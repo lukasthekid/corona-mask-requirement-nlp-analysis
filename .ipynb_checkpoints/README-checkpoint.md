@@ -1,92 +1,31 @@
-# Corona Mask-Requirement NLP Analysis
 
+# Sentiment comparison analysis between user discussions and Corona mask requirement Articles clustered into subject areas (Code)
 
+The Der Standard database's raw text data is utilized and modified by this repository to cluster articles into groups and examine the temporal shift in sentiment of user comments for each article group.
 
-## Getting started
+#### Directory Structure
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- comments: pipeline for user comment data (article pipeline should be done first)
+- comparison: sentiment comparison analyze code after both pipeline were successful
+- content: pipeline for article data
+- data: contains all the stored data .csv that are needed for further processing and analysation.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+To run all the notebooks successful follow this guide step by step
 
-## Add your files
+### Corona Article Content Pipeline (in directory /content)
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+1. To preprocess the data and obtain the preprocessed content, run the "preprocessing.ipynb" file. The input data is the raw export data from the Database, which may not be included in the data directory of this repository.
+2. To cluster similar articles, go to the /clustering directory and run the "KMean-clustering.ipynb" file. The input is the preprocessed data frame, and the output is a set of CSV files in the ../data/feature directory. Each CSV file corresponds to a cluster found, and there is also an "knn_clustering.csv" file that shows the cluster value for each article.
+3. To perform opinion mining and see the most important phrases and words per cluster, go to the /opinion directory and run the "TFIDS-Cluster.ipynb" file. First, manually label each cluster with the help of the TFIDS scores. Then, input the CSV files for each cluster that were calculated before and stored under ../data/feature/cluster. The output is a CSV file "tfids_cluster.csv" that shows the important phrases per cluster in a single table. In the last cell, you can find the cluster description in commented lines.
+4. To compare the supervised clusters given by Der Standard with our clusters, run the "DerStandard_Classifier.ipynb" file. The output is two CSV files: "supervise_clustered_content.csv", which contains the keywords for each of our found clusters, and "supervise_classified_content.csv", which contains keywords per article. This step is not necessary for the further text pipeline but may be interesting to see.
+5. To calculate the sentiment score for each word in each article for later comparison, run the "Sentiment_Score.ipynb" file. The input is the preprocessed content and the _sentiws_ dictionary. The output is a file "sentiws_content.csv" that contains the calculated scores for each article.
 
-```
-cd existing_repo
-git remote add origin https://gitlab.tuwien.ac.at/recsys-laboratory/standard/bachelor-thesis-lukas-burtscher/corona-mask-requirement-nlp-analysis.git
-git branch -M main
-git push -uf origin main
-```
+### Corona Postings Pipeline (in directory /comments)
 
-## Integrate with your tools
+1. To preprocess the raw export data, run the "preprocessing.ipynb" file. Note that the raw data is not included in this repository, and there are over 500k comments, so the preprocessing is done in multiprocess to save time. If the pipeline frequently shuts down, you can use the "mergingBigFrame.ipynb" notebook from a previous attempt to merge smaller preprocessing frames together.
+2. To calculate the sentiment score for each comment and the overall sub-discussions, go to the /sentiment directory and run the "sentiment_comment.ipynb" file. The input is the preprocessed data in a .zip file to save space. The output is a CSV file "sentiws_comment.csv" that shows all relevant scores for further analysis.
 
-- [ ] [Set up project integrations](https://gitlab.tuwien.ac.at/recsys-laboratory/standard/bachelor-thesis-lukas-burtscher/corona-mask-requirement-nlp-analysis/-/settings/integrations)
+### Comparison Analysis
 
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+3. run "sent_plots.ipynb" in the /comparison folder for comparing the sentiment scores. Input are the feature files for the corona article content (clustering and sentiment scores) and output are different plots and a CSV file (content_interesting.csv) containing interesting articles, where the community sentiment was completely different to the article's one.
+4. run "viral-article.ipynb" in the /comparison folder to see the content to comments relations in plots.
